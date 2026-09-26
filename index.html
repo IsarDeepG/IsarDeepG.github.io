@@ -136,7 +136,7 @@
   <div id="pay">
     <p style="color:#e8c36a;letter-spacing:.16em;font-size:11px">LOCKED</p>
     <h1>Unlock the other rooms</h1>
-    <p id="payLine" style="margin-bottom:12px;opacity:.9">Kitchen and Bedroom open after a one-time Razorpay payment. Great Hall stays free.</p>
+    <p id="payLine" style="margin-bottom:12px;opacity:.9">One payment unlocks Kitchen and Bedroom on this phone. Cards work from any country. Great Hall stays free.</p>
     <button id="payGo" type="button">Pay to unlock</button>
     <button id="payNo" type="button">Not now</button>
   </div>
@@ -293,7 +293,7 @@ function renderList(){
 
 function openScene(sc){
   if (!sc.free && !paid) {
-    document.getElementById("payLine").textContent = sc.name + " opens after payment. Great Hall stays free.";
+    document.getElementById("payLine").textContent = sc.name + " unlocks with one payment. Cards work from any country. Great Hall stays free.";
     document.getElementById("pay").classList.add("on");
     return;
   }
@@ -370,7 +370,7 @@ SCENES.forEach((sc) => {
 });
 document.getElementById("payNo").onclick = () => document.getElementById("pay").classList.remove("on");
 document.getElementById("payGo").onclick = () => {
-  if (!UNLOCK_URL) { say("Razorpay link is not set yet"); return; }
+  if (!UNLOCK_URL) { say("Payment link is not set yet"); return; }
   window.open(UNLOCK_URL, "_blank", "noopener");
 };
 document.getElementById("contactBtn").onclick = () => {
