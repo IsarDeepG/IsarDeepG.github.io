@@ -5,254 +5,304 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Holly Haunt</title>
   <style>
+    :root { --gold:#e8c36a; --ink:#140a0c; --cream:#fff3dc; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; background: #12080a; color: #fff4dc; font-family: Trebuchet MS, Segoe UI, sans-serif; }
-    body { display: flex; flex-direction: column; }
-    header {
-      padding: 10px 12px 6px;
-      display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    html, body { height: 100%; background: #140a0c; color: var(--cream); font-family: "Trebuchet MS", "Segoe UI", sans-serif; }
+    body {
+      display: flex; flex-direction: column;
+      height: 100dvh;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
     }
-    header b { color: #e8c36a; letter-spacing: .12em; font-size: 12px; }
-    #score { font-weight: 800; }
+    header {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      padding: 8px 12px 6px;
+    }
+    header b { color: var(--gold); letter-spacing: .14em; font-size: 11px; }
+    #sub { font-size: 13px; opacity: .85; }
+    #score { font-weight: 800; font-size: 18px; }
     #stage {
       position: relative;
       flex: 1;
-      min-height: 220px;
+      min-height: 0;
+      background: #070405;
       touch-action: none;
-      background: #000;
     }
-    #stage img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; display: block; }
-    .mark {
-      position: absolute; border: 2px dashed #e8c36acc; border-radius: 50%;
-      pointer-events: none; transform: translate(-50%,-50%);
+    #pic {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: contain;
+      pointer-events: none;
     }
-    .mark.got { border-style: solid; border-color: #3ecf8e; background: #3ecf8e33; }
+    .ring {
+      position: absolute; border-radius: 50%;
+      transform: translate(-50%,-50%);
+      pointer-events: none;
+      border: 3px solid #3ecf8e;
+      box-shadow: 0 0 12px #3ecf8e99;
+    }
+    .ring.hint {
+      border: 3px dashed #e8c36a;
+      box-shadow: 0 0 16px #e8c36a;
+      animation: pulse .8s ease-in-out 4;
+    }
+    @keyframes pulse { 50% { transform: translate(-50%,-50%) scale(1.15); } }
     #toast {
-      position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%);
-      background: #000c; padding: 8px 12px; border-radius: 999px; font-size: 14px;
-      pointer-events: none; opacity: 0; transition: opacity .2s;
+      position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%);
+      background: #000c; padding: 8px 14px; border-radius: 999px;
+      font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none;
+      white-space: nowrap;
     }
     #toast.on { opacity: 1; }
     #list {
-      display: flex; gap: 6px; overflow-x: auto; padding: 8px 10px;
-      background: #1a100c;
+      display: flex; gap: 6px; overflow-x: auto;
+      padding: 7px 10px; background: #1c1010;
     }
-    .chip { flex: 0 0 auto; padding: 7px 10px; border-radius: 999px; background: #fff2; font-size: 13px; }
-    .chip.got { text-decoration: line-through; opacity: .45; }
-    #bar { display: flex; gap: 8px; padding: 8px 10px 14px; background: #1a100c; }
-    button {
-      flex: 1; height: 48px; border: 0; border-radius: 12px;
-      font: 800 15px Trebuchet MS, sans-serif; background: #e8c36a; color: #1a120c;
+    .chip {
+      flex: 0 0 auto; border: 0; border-radius: 999px;
+      padding: 7px 10px; background: #fff2; color: var(--cream); font-size: 12px;
     }
-    button.ghost { background: #fff2; color: #fff4dc; }
-    #pick, #pay {
-      position: fixed; inset: 0; background: #12080af2; padding: 18px;
-      display: none; flex-direction: column; justify-content: flex-end; z-index: 5;
+    .chip.got { text-decoration: line-through; opacity: .4; }
+    #bar {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 8px; padding: 8px 10px 10px; background: #1c1010;
     }
-    #pick.on, #pay.on { display: flex; }
-    h1 { font-size: 34px; line-height: 1; margin: 8px 0 12px; }
-    .rooms { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    #bar button {
+      height: 48px; border: 0; border-radius: 14px;
+      font: 800 16px "Trebuchet MS", sans-serif;
+    }
+    #roomsBtn { background: #3a241c; color: var(--cream); }
+    #hintBtn { background: var(--gold); color: #1a1208; }
+    #pick {
+      position: fixed; inset: 0; background: #140a0cee;
+      display: none; flex-direction: column; justify-content: flex-end;
+      padding: 18px; z-index: 5;
+    }
+    #pick.on { display: flex; }
+    h1 { font-size: 32px; line-height: .95; margin: 6px 0 12px; }
+    .rooms { display: grid; gap: 8px; }
     .room {
-      min-height: 92px; border-radius: 12px; border: 1px solid #e8c36a55;
-      background: #2a1810 center/cover no-repeat; color: #fff; text-align: left; padding: 8px;
-      font: 800 14px Trebuchet MS, sans-serif;
+      min-height: 72px; border: 1px solid #e8c36a55; border-radius: 14px;
+      background: #2a1812 center/cover no-repeat; color: #fff;
+      text-align: left; padding: 12px; font: 800 16px "Trebuchet MS", sans-serif;
     }
-    .room.lock { filter: grayscale(.6); }
   </style>
 </head>
 <body>
   <header>
-    <div><b id="roomName">HOLLY HAUNT</b><div id="hintLine">Tap the picture</div></div>
-    <div id="score">0/0</div>
+    <div>
+      <b id="roomName">GREAT HALL</b>
+      <div id="sub">Tap the objects in the picture</div>
+    </div>
+    <div id="score">0/12</div>
   </header>
   <div id="stage">
     <img id="pic" alt="room" />
-    <div id="toast">Tap something</div>
+    <div id="toast">Tap the picture</div>
   </div>
   <div id="list"></div>
   <div id="bar">
-    <button class="ghost" id="roomsBtn" type="button">Rooms</button>
+    <button id="roomsBtn" type="button">Rooms</button>
     <button id="hintBtn" type="button">Hint</button>
   </div>
   <div id="pick">
-    <p style="color:#e8c36a;letter-spacing:.16em;font-size:11px">HALLOWEEN × CHRISTMAS</p>
-    <h1>Tap the room.<br>Tap the things.</h1>
+    <p style="color:#e8c36a;letter-spacing:.16em;font-size:11px">HOLLY HAUNT</p>
+    <h1>Pick a room</h1>
     <div class="rooms" id="rooms"></div>
   </div>
-  <div id="pay">
-    <h1>Locked rooms</h1>
-    <p style="margin-bottom:12px">Attic, Conservatory and Cellar unlock after payment.</p>
-    <button id="payGo" type="button">Open payment link</button>
-    <button class="ghost" id="payNo" type="button" style="margin-top:8px">Back</button>
-  </div>
 <script>
-const UNLOCK_URL = "https://buy.stripe.com/test_hollyhaunt";
-const paid = localStorage.getItem("hollyHaunt.paid") === "1" || /paid=1/.test(location.search);
 const SCENES = [
-  { id:"hall", name:"Great Hall", file:"hall.jpg", free:true, items:[
-    {n:"Carnival mask",x:18,y:24},{n:"Snow globe",x:24.2,y:41},{n:"Shelf clock",x:8.4,y:30},
-    {n:"Wooden dog",x:4.4,y:58},{n:"Owl",x:9.6,y:58},{n:"Treasure chest",x:21,y:78},
-    {n:"Music box",x:27,y:80},{n:"Witch bear",x:32.2,y:76},{n:"Wrapped gifts",x:37,y:66},
-    {n:"Old map",x:36.5,y:88},{n:"Spectacles",x:43,y:89},{n:"Thimble",x:50,y:86},
-    {n:"Gold coins",x:59,y:89},{n:"Toy soldier",x:72.4,y:88},{n:"Mantel key",x:52.1,y:47},
-    {n:"Hourglass",x:62.4,y:55}
+  { id:"hall", name:"Great Hall", file:"hall.jpg", items:[
+    {n:"Moon",x:50,y:11,s:10},
+    {n:"Witch bear",x:16,y:50,s:14},
+    {n:"Treasure chest",x:24,y:68,s:14},
+    {n:"Music box",x:48,y:66,s:12},
+    {n:"Nutcracker",x:68,y:58,s:12},
+    {n:"Carnival mask",x:88,y:67,s:10},
+    {n:"Wooden dog",x:11,y:78,s:12},
+    {n:"Snow globe",x:76,y:74,s:10},
+    {n:"Hourglass",x:90,y:81,s:9},
+    {n:"Spectacles",x:38,y:88,s:10},
+    {n:"Thimble",x:52,y:86,s:7},
+    {n:"Golden key",x:64,y:89,s:11}
   ]},
-  { id:"kitchen", name:"Kitchen", file:"kitchen.jpg", free:true, items:[
-    {n:"Wall clock",x:35,y:18},{n:"Copper pans",x:16,y:18},{n:"Kettle",x:15,y:57},
-    {n:"Left pumpkin",x:28,y:58},{n:"Table pumpkin",x:38,y:59},{n:"Cauldron",x:52,y:55},
-    {n:"Gingerbread",x:30,y:72},{n:"Candy cane",x:38,y:79},{n:"Rolling pin",x:52,y:73},
-    {n:"Lattice pie",x:66,y:67},{n:"Black cat",x:86,y:72},{n:"Moon window",x:87,y:20},
-    {n:"Kitchen tree",x:62,y:30},{n:"Table lantern",x:76,y:63}
+  { id:"kitchen", name:"Kitchen", file:"kitchen.jpg", items:[
+    {n:"Wall clock",x:50,y:12,s:10},
+    {n:"Hanging lantern",x:68,y:14,s:9},
+    {n:"Moon window",x:84,y:16,s:12},
+    {n:"Kitchen tree",x:90,y:34,s:12},
+    {n:"Cauldron",x:68,y:48,s:12},
+    {n:"Big pumpkin",x:32,y:52,s:12},
+    {n:"Red candle",x:22,y:58,s:8},
+    {n:"Gingerbread",x:28,y:70,s:9},
+    {n:"Candy cane",x:36,y:74,s:8},
+    {n:"Rolling pin",x:48,y:68,s:11},
+    {n:"Lattice pie",x:58,y:62,s:11},
+    {n:"Black cat",x:82,y:78,s:13}
   ]},
-  { id:"bedroom", name:"Bedroom", file:"bedroom.jpg", free:true, items:[
-    {n:"Oval mirror",x:10,y:20},{n:"Corner tree",x:21,y:36},{n:"Jewelry box",x:11,y:47},
-    {n:"Witch bear",x:11,y:74},{n:"Nightstand pumpkin",x:29,y:53},{n:"Moon",x:74,y:14},
-    {n:"Grandfather clock",x:93,y:28},{n:"Floor train",x:30,y:82},{n:"Spectacles",x:45,y:85},
-    {n:"Hourglass",x:70,y:78},{n:"Gift tower",x:92,y:78},{n:"Hanging moon",x:39,y:26}
-  ]},
-  { id:"attic", name:"Attic", file:"attic.jpg", free:false, items:[
-    {n:"Round window",x:15,y:21},{n:"Rocking horse",x:23,y:46},{n:"Snow globe",x:6,y:68},
-    {n:"Carnival mask",x:10,y:83},{n:"Ballerina box",x:20,y:69},{n:"Attic tree",x:46,y:43},
-    {n:"Floor map",x:47,y:85},{n:"Toy soldier",x:56,y:74},{n:"Gold chest",x:69,y:57},
-    {n:"Rafter owl",x:81,y:14},{n:"Hanging keys",x:71,y:26},{n:"Floor pumpkin",x:74,y:76}
-  ]},
-  { id:"conservatory", name:"Conservatory", file:"conservatory.jpg", free:false, items:[
-    {n:"Hanging key",x:9,y:18},{n:"Glasshouse tree",x:20,y:40},{n:"Path pumpkins",x:23,y:75},
-    {n:"Watering can",x:8,y:84},{n:"Spectacles",x:34,y:85},{n:"Moon",x:42,y:10},
-    {n:"Fountain",x:53,y:50},{n:"Ink bottle",x:50,y:86},{n:"Table gift",x:62,y:86},
-    {n:"Hanging potions",x:83,y:35},{n:"Bench pumpkin",x:91,y:80}
-  ]},
-  { id:"cellar", name:"Cellar", file:"cellar.jpg", free:false, items:[
-    {n:"Hanging herbs",x:15,y:8},{n:"Candle ring",x:31,y:15},{n:"Potion row",x:14,y:48},
-    {n:"Floor pumpkin",x:17,y:85},{n:"Cellar tree",x:42,y:47},{n:"Toy train",x:43,y:82},
-    {n:"Moon window",x:54,y:13},{n:"Hearth",x:69,y:50},{n:"Coin chest",x:65,y:71},
-    {n:"Hearth pumpkins",x:85,y:68},{n:"Wall keys",x:92,y:24},{n:"Snow globe",x:80,y:82}
+  { id:"bedroom", name:"Bedroom", file:"bedroom.jpg", items:[
+    {n:"Crescent moon",x:73,y:10,s:8},
+    {n:"Window moon",x:90,y:14,s:10},
+    {n:"Oval mirror",x:8,y:24,s:12},
+    {n:"Jewelry box",x:13,y:38,s:12},
+    {n:"Grandfather clock",x:68,y:30,s:10},
+    {n:"Corner tree",x:88,y:36,s:12},
+    {n:"Night pumpkin",x:90,y:50,s:10},
+    {n:"Witch bear",x:18,y:58,s:14},
+    {n:"Toy train",x:22,y:76,s:14},
+    {n:"Spectacles",x:48,y:84,s:10},
+    {n:"Hourglass",x:68,y:78,s:10},
+    {n:"Gift tower",x:90,y:72,s:12}
   ]}
 ];
 
-const pic = document.getElementById("pic");
 const stage = document.getElementById("stage");
+const pic = document.getElementById("pic");
 const list = document.getElementById("list");
 const toast = document.getElementById("toast");
 const pick = document.getElementById("pick");
-const pay = document.getElementById("pay");
 let scene = SCENES[0];
 let found = new Set();
 let hints = 3;
 let actx = null;
 
-function beep(f,d,t){
+function beep(f,d,type){
   try{
     actx = actx || new (window.AudioContext||window.webkitAudioContext)();
-    if(actx.state==="suspended") actx.resume();
-    const o=actx.createOscillator(), g=actx.createGain();
-    o.type=t||"sine"; o.frequency.value=f; g.gain.value=.06;
-    g.gain.exponentialRampToValueAtTime(.001, actx.currentTime+d);
-    o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime+d);
-  }catch(e){}
+    if (actx.state === "suspended") actx.resume();
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type || "sine"; o.frequency.value = f; g.gain.value = .07;
+    g.gain.exponentialRampToValueAtTime(.001, actx.currentTime + d);
+    o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime + d);
+  } catch(e) {}
 }
-function say(s){ toast.textContent=s; toast.classList.add("on"); clearTimeout(say.t); say.t=setTimeout(()=>toast.classList.remove("on"),1400); }
+function say(t){
+  toast.textContent = t;
+  toast.classList.add("on");
+  clearTimeout(say.tid);
+  say.tid = setTimeout(() => toast.classList.remove("on"), 1300);
+}
+
+function imageBox(){
+  const r = stage.getBoundingClientRect();
+  const nw = pic.naturalWidth || 2, nh = pic.naturalHeight || 3;
+  const sr = r.width / Math.max(1, r.height);
+  const ir = nw / nh;
+  let w, h, left, top;
+  if (sr > ir) {
+    h = r.height; w = h * ir;
+    left = r.left + (r.width - w) / 2; top = r.top;
+  } else {
+    w = r.width; h = w / ir;
+    left = r.left; top = r.top + (r.height - h) / 2;
+  }
+  return { left, top, w, h };
+}
+
+function pctToScreen(x, y){
+  const b = imageBox();
+  return { x: b.left + b.w * x / 100, y: b.top + b.h * y / 100, w: b.w, h: b.h };
+}
+
+function clearRings(){
+  stage.querySelectorAll(".ring").forEach(n => n.remove());
+}
+function placeRing(it, cls){
+  const p = pctToScreen(it.x, it.y);
+  const b = imageBox();
+  const el = document.createElement("div");
+  el.className = "ring " + (cls || "");
+  const size = Math.max(36, (it.s || 10) / 100 * b.w);
+  el.style.width = size + "px";
+  el.style.height = size + "px";
+  const sr = stage.getBoundingClientRect();
+  el.style.left = (p.x - sr.left) + "px";
+  el.style.top = (p.y - sr.top) + "px";
+  stage.appendChild(el);
+  return el;
+}
+
+function drawFound(){
+  clearRings();
+  scene.items.forEach((it, i) => { if (found.has(i)) placeRing(it); });
+}
 
 function renderList(){
-  list.innerHTML="";
-  scene.items.forEach((it,i)=>{
-    const c=document.createElement("button");
-    c.className="chip"+(found.has(i)?" got":"");
-    c.textContent=it.n;
-    c.onclick=()=>flash(i);
-    list.appendChild(c);
+  list.innerHTML = "";
+  scene.items.forEach((it, i) => {
+    const b = document.createElement("button");
+    b.className = "chip" + (found.has(i) ? " got" : "");
+    b.textContent = it.n;
+    b.onclick = () => { say("Find the " + it.n); };
+    list.appendChild(b);
   });
-  document.getElementById("score").textContent=found.size+"/"+scene.items.length;
-  document.getElementById("roomName").textContent=scene.name.toUpperCase();
-  drawMarks();
-}
-
-function drawMarks(){
-  stage.querySelectorAll(".mark").forEach(n=>n.remove());
-  scene.items.forEach((it,i)=>{
-    if(!found.has(i)) return;
-    const m=document.createElement("div");
-    m.className="mark got";
-    m.style.left=it.x+"%"; m.style.top=it.y+"%";
-    m.style.width="9%"; m.style.height="16%";
-    stage.appendChild(m);
-  });
-}
-
-function flash(i){
-  const it=scene.items[i];
-  const m=document.createElement("div");
-  m.className="mark";
-  m.style.left=it.x+"%"; m.style.top=it.y+"%";
-  m.style.width="10%"; m.style.height="18%";
-  stage.appendChild(m);
-  setTimeout(()=>m.remove(),900);
-  beep(880,.12,"triangle");
+  document.getElementById("score").textContent = found.size + "/" + scene.items.length;
+  document.getElementById("roomName").textContent = scene.name.toUpperCase();
+  drawFound();
 }
 
 function openScene(sc){
-  if(!sc.free && !paid){ pay.classList.add("on"); return; }
-  scene=sc; found=new Set(); hints=3;
-  pic.src=sc.file;
+  scene = sc; found = new Set(); hints = 3;
+  pic.src = sc.file;
   pick.classList.remove("on");
-  pay.classList.remove("on");
   renderList();
-  say("Tap objects in the picture");
-  beep(523,.1,"triangle");
+  say("Tap objects");
+  beep(523, .1, "triangle");
 }
 
-function hit(x,y){
-  let best=-1, bestD=999;
-  scene.items.forEach((it,i)=>{
-    const dx=x-it.x, dy=(y-it.y)*0.7;
-    const d=Math.hypot(dx,dy);
-    if(d<bestD){ bestD=d; best=i; }
+function hit(clientX, clientY){
+  const b = imageBox();
+  const x = (clientX - b.left) / b.w * 100;
+  const y = (clientY - b.top) / b.h * 100;
+  if (x < -2 || y < -2 || x > 102 || y > 102) { say("Tap the picture"); return; }
+  let best = -1, bestD = 1e9;
+  scene.items.forEach((it, i) => {
+    const dx = x - it.x;
+    const dy = (y - it.y) * (b.h / b.w);
+    const d = Math.hypot(dx, dy);
+    const need = (it.s || 10) * 0.7;
+    if (d < need && d < bestD) { bestD = d; best = i; }
   });
-  if(best<0 || bestD>9){ say("Nothing there"); beep(140,.08,"sawtooth"); return; }
-  if(found.has(best)){ say("Already found"); return; }
+  if (best < 0) { say("Not that"); beep(160, .08, "sawtooth"); return; }
+  if (found.has(best)) { say("Already found"); return; }
   found.add(best);
-  beep(784,.12,"triangle"); setTimeout(()=>beep(1046,.16,"sine"),80);
+  beep(784, .1, "triangle");
+  setTimeout(() => beep(1046, .14, "sine"), 70);
   say(scene.items[best].n);
   renderList();
-  if(found.size===scene.items.length){
+  if (found.size === scene.items.length) {
     say("Room cleared");
-    setTimeout(()=>pick.classList.add("on"),700);
+    setTimeout(() => pick.classList.add("on"), 800);
   }
 }
 
-stage.addEventListener("pointerdown", (e)=>{
-  const r=stage.getBoundingClientRect();
-  const img=pic.getBoundingClientRect();
-  // map tap onto the contained image box, not the letterbox
-  const box = img.width && img.height ? img : r;
-  const x=(e.clientX-box.left)/box.width*100;
-  const y=(e.clientY-box.top)/box.height*100;
-  if(x<0||y<0||x>100||y>100){ say("Tap the picture"); return; }
-  hit(x,y);
+stage.addEventListener("pointerdown", (e) => {
+  e.preventDefault();
+  hit(e.clientX, e.clientY);
 });
+window.addEventListener("resize", drawFound);
+pic.addEventListener("load", drawFound);
 
-document.getElementById("roomsBtn").onclick=()=>pick.classList.add("on");
-document.getElementById("hintBtn").onclick=()=>{
-  const i=scene.items.findIndex((_,k)=>!found.has(k));
-  if(i<0||hints<=0){ say("No hints left"); return; }
-  hints--; flash(i); say("Look here · "+hints+" hints left");
+document.getElementById("roomsBtn").onclick = () => pick.classList.add("on");
+document.getElementById("hintBtn").onclick = () => {
+  const i = scene.items.findIndex((_, k) => !found.has(k));
+  if (i < 0 || hints <= 0) { say("No hints left"); return; }
+  hints--;
+  const el = placeRing(scene.items[i], "hint");
+  setTimeout(() => el.remove(), 1800);
+  say(scene.items[i].n + " · " + hints + " left");
+  beep(880, .12, "triangle");
 };
-document.getElementById("payNo").onclick=()=>pay.classList.remove("on");
-document.getElementById("payGo").onclick=()=>window.open(UNLOCK_URL,"_blank","noopener");
 
-function drawPick(){
-  const el=document.getElementById("rooms");
-  el.innerHTML="";
-  SCENES.forEach(sc=>{
-    const b=document.createElement("button");
-    b.className="room"+((sc.free||paid)?"":" lock");
-    b.style.backgroundImage="url('"+sc.file+"')";
-    b.textContent=sc.name+((sc.free||paid)?"":" 🔒");
-    b.onclick=()=>openScene(sc);
-    el.appendChild(b);
-  });
-}
-drawPick();
+const roomsEl = document.getElementById("rooms");
+SCENES.forEach((sc) => {
+  const b = document.createElement("button");
+  b.className = "room";
+  b.style.backgroundImage = "url('" + sc.file + "')";
+  b.textContent = sc.name;
+  b.onclick = () => openScene(sc);
+  roomsEl.appendChild(b);
+});
 openScene(SCENES[0]);
 </script>
 </body>
