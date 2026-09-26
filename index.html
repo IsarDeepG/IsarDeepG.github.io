@@ -81,11 +81,17 @@
     #pick.on { display: flex; }
     h1 { font-size: 32px; line-height: .95; margin: 6px 0 12px; }
     .rooms { display: grid; gap: 8px; }
-    .room {
-      min-height: 72px; border: 1px solid #e8c36a55; border-radius: 14px;
-      background: #2a1812 center/cover no-repeat; color: #fff;
-      text-align: left; padding: 12px; font: 800 16px "Trebuchet MS", sans-serif;
+    .room.lock { filter: grayscale(.55) brightness(.7); }
+    .room .tag { display:block; font-size:11px; letter-spacing:.12em; color:#e8c36a; margin-top:4px; }
+    #pay {
+      position: fixed; inset: 0; background: #140a0cf2;
+      display: none; flex-direction: column; justify-content: flex-end;
+      padding: 18px; z-index: 6;
     }
+    #pay.on { display: flex; }
+    #pay button { height: 48px; border: 0; border-radius: 14px; font: 800 16px "Trebuchet MS", sans-serif; margin-top: 8px; }
+    #payGo { background: var(--gold); color: #1a1208; }
+    #payNo { background: #3a241c; color: var(--cream); }
   </style>
 </head>
 <body>
@@ -110,9 +116,18 @@
     <h1>Pick a room</h1>
     <div class="rooms" id="rooms"></div>
   </div>
+  <div id="pay">
+    <p style="color:#e8c36a;letter-spacing:.16em;font-size:11px">LOCKED</p>
+    <h1>Unlock the other rooms</h1>
+    <p id="payLine" style="margin-bottom:12px;opacity:.9">Kitchen and Bedroom open after payment.</p>
+    <button id="payGo" type="button">Pay to unlock</button>
+    <button id="payNo" type="button">Not now</button>
+  </div>
 <script>
+const UNLOCK_URL = "https://buy.stripe.com/test_hollyhaunt";
+const paid = localStorage.getItem("hollyHaunt.paid") === "1" || /[?&]paid=1/.test(location.search);
 const SCENES = [
-  { id:"hall", name:"Great Hall", file:"hall.jpg", items:[
+  { id:"hall", name:"Great Hall", file:"hall.jpg", free:true, items:[
     {n:"Moon",x:50,y:11,s:10},
     {n:"Witch bear",x:16,y:50,s:14},
     {n:"Treasure chest",x:24,y:68,s:14},
@@ -126,7 +141,7 @@ const SCENES = [
     {n:"Thimble",x:52,y:86,s:7},
     {n:"Golden key",x:64,y:89,s:11}
   ]},
-  { id:"kitchen", name:"Kitchen", file:"kitchen.jpg", items:[
+  { id:"kitchen", name:"Kitchen", file:"kitchen.jpg", free:false, items:[
     {n:"Wall clock",x:50,y:12,s:10},
     {n:"Hanging lantern",x:68,y:14,s:9},
     {n:"Moon window",x:84,y:16,s:12},
@@ -140,7 +155,7 @@ const SCENES = [
     {n:"Lattice pie",x:58,y:62,s:11},
     {n:"Black cat",x:82,y:78,s:13}
   ]},
-  { id:"bedroom", name:"Bedroom", file:"bedroom.jpg", items:[
+  { id:"bedroom", name:"Bedroom", file:"bedroom.jpg", free:false, items:[
     {n:"Crescent moon",x:73,y:10,s:8},
     {n:"Window moon",x:90,y:14,s:10},
     {n:"Oval mirror",x:8,y:24,s:12},
@@ -242,9 +257,15 @@ function renderList(){
 }
 
 function openScene(sc){
+  if (!sc.free && !paid) {
+    document.getElementById("payLine").textContent = sc.name + " opens after payment. Great Hall stays free.";
+    document.getElementById("pay").classList.add("on");
+    return;
+  }
   scene = sc; found = new Set(); hints = 3;
   pic.src = sc.file;
   pick.classList.remove("on");
+  document.getElementById("pay").classList.remove("on");
   renderList();
   say("Tap objects");
   beep(523, .1, "triangle");
@@ -297,12 +318,14 @@ document.getElementById("hintBtn").onclick = () => {
 const roomsEl = document.getElementById("rooms");
 SCENES.forEach((sc) => {
   const b = document.createElement("button");
-  b.className = "room";
+  b.className = "room" + ((sc.free || paid) ? "" : " lock");
   b.style.backgroundImage = "url('" + sc.file + "')";
-  b.textContent = sc.name;
+  b.innerHTML = sc.name + '<span class="tag">' + ((sc.free || paid) ? "FREE" : "LOCKED · PAY") + "</span>";
   b.onclick = () => openScene(sc);
   roomsEl.appendChild(b);
 });
+document.getElementById("payNo").onclick = () => document.getElementById("pay").classList.remove("on");
+document.getElementById("payGo").onclick = () => window.open(UNLOCK_URL, "_blank", "noopener");
 openScene(SCENES[0]);
 </script>
 </body>
