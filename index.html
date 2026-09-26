@@ -53,7 +53,13 @@
       font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none;
       white-space: nowrap;
     }
-    #toast.on { opacity: 1; }
+    .pop {
+      position: absolute; transform: translate(-50%, -80%);
+      font: 800 22px "Trebuchet MS", sans-serif; color: #fff6d8;
+      text-shadow: 0 2px 10px #000; pointer-events: none; z-index: 4;
+      animation: floaty .9s ease-out forwards;
+    }
+    @keyframes floaty { to { transform: translate(-50%, -160%); opacity: 0; } }
     #list {
       display: flex; gap: 6px; overflow-x: auto;
       padding: 7px 10px; background: #1c1010;
@@ -180,16 +186,117 @@ let scene = SCENES[0];
 let found = new Set();
 let hints = 3;
 let actx = null;
+let findN = 0;
 
-function beep(f,d,type){
-  try{
-    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
-    if (actx.state === "suspended") actx.resume();
-    const o = actx.createOscillator(), g = actx.createGain();
-    o.type = type || "sine"; o.frequency.value = f; g.gain.value = .07;
-    g.gain.exponentialRampToValueAtTime(.001, actx.currentTime + d);
-    o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime + d);
-  } catch(e) {}
+function audio(){
+  actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+  if (actx.state === "suspended") actx.resume();
+  return actx;
+}
+function tone(freq, t, dur, type, vol){
+  const c = audio();
+  const o = c.createOscillator();
+  const g = c.createGain();
+  o.type = type || "sine";
+  o.frequency.setValueAtTime(freq, t);
+  o.frequency.exponentialRampToValueAtTime(Math.max(40, freq * 0.97), t + dur);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol || 0.1, t + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t); o.stop(t + dur + 0.02);
+}
+function tick(t){
+  const c = audio();
+  const n = Math.floor(c.sampleRate * 0.045);
+  const buf = c.createBuffer(1, n, c.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+  const s = c.createBufferSource();
+  s.buffer = buf;
+  const f = c.createBiquadFilter();
+  f.type = "highpass";
+  f.frequency.value = 1800;
+  const g = c.createGain();
+  g.gain.setValueAtTime(0.09, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.045);
+  s.connect(f); f.connect(g); g.connect(c.destination);
+  s.start(t);
+}
+function bell(freq, t){
+  tone(freq, t, 0.22, "sine", 0.11);
+  tone(freq * 2.02, t, 0.14, "triangle", 0.045);
+  tick(t);
+}
+function jingle(){
+  const t = audio().currentTime + 0.02;
+  const E = 659.25, G = 783.99, C = 523.25, D = 587.33;
+  bell(E, t);
+  bell(E, t + 0.16);
+  bell(E, t + 0.32);
+  bell(G, t + 0.52);
+  bell(C, t + 0.68);
+  bell(D, t + 0.84);
+  bell(E, t + 1.04);
+}
+function hoho(){
+  const c = audio();
+  const t0 = c.currentTime + 0.02;
+  [0, 0.32, 0.64].forEach((dt, i) => {
+    const t = t0 + dt;
+    const o = c.createOscillator();
+    const g = c.createGain();
+    const bp = c.createBiquadFilter();
+    o.type = "sawtooth";
+    const f = 130 + i * 28;
+    o.frequency.setValueAtTime(f * 0.85, t);
+    o.frequency.exponentialRampToValueAtTime(f * 1.45, t + 0.1);
+    o.frequency.exponentialRampToValueAtTime(f * 0.8, t + 0.24);
+    bp.type = "bandpass";
+    bp.frequency.value = 650 + i * 80;
+    bp.Q.value = 5;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.2, t + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.24);
+    o.connect(bp); bp.connect(g); g.connect(c.destination);
+    o.start(t); o.stop(t + 0.26);
+    const len = Math.floor(c.sampleRate * 0.2);
+    const buf = c.createBuffer(1, len, c.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let k = 0; k < len; k++) data[k] = (Math.random() * 2 - 1) * Math.sin(Math.PI * k / len);
+    const src = c.createBufferSource();
+    src.buffer = buf;
+    const ng = c.createGain();
+    ng.gain.value = 0.05;
+    const hf = c.createBiquadFilter();
+    hf.type = "bandpass";
+    hf.frequency.value = 1400;
+    src.connect(hf); hf.connect(ng); ng.connect(c.destination);
+    src.start(t);
+  });
+}
+function miss(){
+  tone(140, audio().currentTime + 0.01, 0.09, "sawtooth", 0.05);
+}
+function safe(fn){ try { fn(); } catch (e) {} }
+function celebrate(){
+  findN++;
+  if (findN % 2 === 0) hoho();
+  else jingle();
+}
+  findN++;
+  if (findN % 2 === 0) hoho();
+  else jingle();
+}
+function popAt(clientX, clientY, text){
+  const sr = stage.getBoundingClientRect();
+  const el = document.createElement("div");
+  el.className = "pop";
+  el.textContent = text;
+  el.style.left = (clientX - sr.left) + "px";
+  el.style.top = (clientY - sr.top) + "px";
+  stage.appendChild(el);
+  setTimeout(() => el.remove(), 900);
 }
 function say(t){
   toast.textContent = t;
@@ -237,11 +344,6 @@ function placeRing(it, cls){
   return el;
 }
 
-function drawFound(){
-  clearRings();
-  scene.items.forEach((it, i) => { if (found.has(i)) placeRing(it); });
-}
-
 function renderList(){
   list.innerHTML = "";
   scene.items.forEach((it, i) => {
@@ -253,7 +355,6 @@ function renderList(){
   });
   document.getElementById("score").textContent = found.size + "/" + scene.items.length;
   document.getElementById("roomName").textContent = scene.name.toUpperCase();
-  drawFound();
 }
 
 function openScene(sc){
@@ -268,7 +369,7 @@ function openScene(sc){
   document.getElementById("pay").classList.remove("on");
   renderList();
   say("Tap objects");
-  beep(523, .1, "triangle");
+  safe(() => bell(523, audio().currentTime + 0.02));
 }
 
 function hit(clientX, clientY){
@@ -284,16 +385,19 @@ function hit(clientX, clientY){
     const need = (it.s || 10) * 0.7;
     if (d < need && d < bestD) { bestD = d; best = i; }
   });
-  if (best < 0) { say("Not that"); beep(160, .08, "sawtooth"); return; }
-  if (found.has(best)) { say("Already found"); return; }
+  if (best < 0) { say("Not that"); safe(miss); return; }
+  if (found.has(best)) { say("Already found"); safe(() => bell(880, audio().currentTime + 0.01)); return; }
   found.add(best);
-  beep(784, .1, "triangle");
-  setTimeout(() => beep(1046, .14, "sine"), 70);
+  const ho = findN % 2 === 1;
+  safe(celebrate);
+  popAt(clientX, clientY, ho ? "Ho ho ho!" : "Jingle!");
   say(scene.items[best].n);
   renderList();
   if (found.size === scene.items.length) {
     say("Room cleared");
-    setTimeout(() => pick.classList.add("on"), 800);
+    safe(() => setTimeout(jingle, 400));
+    safe(() => setTimeout(hoho, 1600));
+    setTimeout(() => pick.classList.add("on"), 2800);
   }
 }
 
@@ -301,8 +405,6 @@ stage.addEventListener("pointerdown", (e) => {
   e.preventDefault();
   hit(e.clientX, e.clientY);
 });
-window.addEventListener("resize", drawFound);
-pic.addEventListener("load", drawFound);
 
 document.getElementById("roomsBtn").onclick = () => pick.classList.add("on");
 document.getElementById("hintBtn").onclick = () => {
@@ -312,7 +414,7 @@ document.getElementById("hintBtn").onclick = () => {
   const el = placeRing(scene.items[i], "hint");
   setTimeout(() => el.remove(), 1800);
   say(scene.items[i].n + " · " + hints + " left");
-  beep(880, .12, "triangle");
+  safe(() => bell(988, audio().currentTime + 0.02));
 };
 
 const roomsEl = document.getElementById("rooms");
