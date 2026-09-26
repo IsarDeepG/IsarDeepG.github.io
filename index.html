@@ -77,6 +77,11 @@
       display: grid; grid-template-columns: 1fr 1fr;
       gap: 8px; padding: 8px 10px 10px; background: #1c1010;
     }
+    #contactBtn {
+      grid-column: 1 / -1; height: 40px; border: 0; border-radius: 12px;
+      background: transparent; color: var(--gold);
+      font: 800 14px "Trebuchet MS", sans-serif;
+    }
     #bar button {
       height: 48px; border: 0; border-radius: 14px;
       font: 800 16px "Trebuchet MS", sans-serif;
@@ -121,6 +126,7 @@
   <div id="bar">
     <button id="roomsBtn" type="button">Rooms</button>
     <button id="hintBtn" type="button">Hint</button>
+    <button id="contactBtn" type="button">Contact us</button>
   </div>
   <div id="pick">
     <p style="color:#e8c36a;letter-spacing:.16em;font-size:11px">HOLLY HAUNT</p>
@@ -130,12 +136,12 @@
   <div id="pay">
     <p style="color:#e8c36a;letter-spacing:.16em;font-size:11px">LOCKED</p>
     <h1>Unlock the other rooms</h1>
-    <p id="payLine" style="margin-bottom:12px;opacity:.9">Kitchen and Bedroom open after payment.</p>
+    <p id="payLine" style="margin-bottom:12px;opacity:.9">Kitchen and Bedroom open after a one-time Razorpay payment. Great Hall stays free.</p>
     <button id="payGo" type="button">Pay to unlock</button>
     <button id="payNo" type="button">Not now</button>
   </div>
 <script>
-const UNLOCK_URL = "https://buy.stripe.com/test_hollyhaunt";
+const UNLOCK_URL = "";
 const paid = localStorage.getItem("hollyHaunt.paid") === "1" || /[?&]paid=1/.test(location.search);
 const SCENES = [
   { id:"hall", name:"Great Hall", file:"hall.jpg", free:true, items:[
@@ -189,7 +195,7 @@ const toast = document.getElementById("toast");
 const pick = document.getElementById("pick");
 let scene = SCENES[0];
 let found = new Set();
-let hints = 3;
+let hintsReady = true;
 let findN = 0;
 let musicOn = true;
 const flute = new Audio("flute.mp3");
@@ -262,7 +268,7 @@ function placeRing(it, cls){
   const b = imageBox();
   const el = document.createElement("div");
   el.className = "ring " + (cls || "");
-  const size = Math.max(36, (it.s || 10) / 100 * b.w);
+  const size = Math.max(cls === "hint" ? 92 : 36, (it.s || 10) / 100 * b.w * (cls === "hint" ? 2 : 1));
   el.style.width = size + "px";
   el.style.height = size + "px";
   const sr = stage.getBoundingClientRect();
@@ -291,7 +297,7 @@ function openScene(sc){
     document.getElementById("pay").classList.add("on");
     return;
   }
-  scene = sc; found = new Set(); hints = 3;
+  scene = sc; found = new Set(); hintsReady = true;
   pic.src = sc.file;
   pick.classList.remove("on");
   document.getElementById("pay").classList.remove("on");
@@ -303,24 +309,28 @@ function openScene(sc){
 function hit(clientX, clientY){
   startBed();
   const b = imageBox();
+  if (b.w < 40 || b.h < 40) { say("Tap the picture"); return; }
   const x = (clientX - b.left) / b.w * 100;
   const y = (clientY - b.top) / b.h * 100;
-  if (x < -2 || y < -2 || x > 102 || y > 102) { say("Tap the picture"); return; }
+  if (x < -4 || y < -4 || x > 104 || y > 104) { say("Tap the picture"); return; }
   let best = -1, bestD = 1e9;
+  let open = -1, openD = 1e9;
   scene.items.forEach((it, i) => {
-    const dx = x - it.x;
-    const dy = (y - it.y) * (b.h / b.w);
+    const dx = (x - it.x) / 100 * b.w;
+    const dy = (y - it.y) / 100 * b.h;
     const d = Math.hypot(dx, dy);
-    const need = (it.s || 10) * 0.7;
-    if (d < need && d < bestD) { bestD = d; best = i; }
+    const rad = Math.max(64, (it.s || 12) / 100 * b.w * 1.6);
+    if (d < rad && d < bestD) { bestD = d; best = i; }
+    if (!found.has(i) && d < rad && d < openD) { openD = d; open = i; }
   });
-  if (best < 0) { say("Not that"); return; }
-  if (found.has(best)) { say("Already found"); return; }
-  found.add(best);
+  const chosen = open >= 0 ? open : best;
+  if (chosen < 0) { say("Not that"); return; }
+  if (found.has(chosen)) { say("Already found"); return; }
+  found.add(chosen);
   const ho = findN % 2 === 1;
   celebrate();
   popAt(clientX, clientY, ho ? "Ho ho ho!" : "Jingle!");
-  say(scene.items[best].n);
+  say(scene.items[chosen].n);
   renderList();
   if (found.size === scene.items.length) {
     say("Room cleared");
@@ -337,12 +347,15 @@ stage.addEventListener("pointerdown", (e) => {
 
 document.getElementById("roomsBtn").onclick = () => pick.classList.add("on");
 document.getElementById("hintBtn").onclick = () => {
+  if (!hintsReady) return;
   const i = scene.items.findIndex((_, k) => !found.has(k));
-  if (i < 0 || hints <= 0) { say("No hints left"); return; }
-  hints--;
+  if (i < 0) { say("Everything is found"); return; }
+  hintsReady = false;
+  setTimeout(() => { hintsReady = true; }, 900);
+  stage.querySelectorAll(".ring.hint").forEach((n) => n.remove());
   const el = placeRing(scene.items[i], "hint");
-  setTimeout(() => el.remove(), 1800);
-  say(scene.items[i].n + " · " + hints + " left");
+  setTimeout(() => { if (el.isConnected) el.remove(); }, 2600);
+  say("Find the " + scene.items[i].n);
   jingle();
 };
 
@@ -356,7 +369,13 @@ SCENES.forEach((sc) => {
   roomsEl.appendChild(b);
 });
 document.getElementById("payNo").onclick = () => document.getElementById("pay").classList.remove("on");
-document.getElementById("payGo").onclick = () => window.open(UNLOCK_URL, "_blank", "noopener");
+document.getElementById("payGo").onclick = () => {
+  if (!UNLOCK_URL) { say("Razorpay link is not set yet"); return; }
+  window.open(UNLOCK_URL, "_blank", "noopener");
+};
+document.getElementById("contactBtn").onclick = () => {
+  window.location.href = "mailto:info@merahissa.co.in?subject=" + encodeURIComponent("Holly Haunt");
+};
 document.getElementById("musicBtn").onclick = () => {
   musicOn = !musicOn;
   document.getElementById("musicBtn").textContent = musicOn ? "Music on" : "Music off";
