@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=3" />
 </head>
 <body>
   <div class="glow" aria-hidden="true"></div>
@@ -17,6 +17,7 @@
     <span class="prop p3" id="p3"></span>
     <span class="prop p4" id="p4"></span>
   </div>
+
   <header class="site-head">
     <div class="feel-wrap" id="festive">
       <button class="feel" id="festiveBtn" type="button">Feel · <span id="festiveLabel">Halloween</span></button>
@@ -31,12 +32,14 @@
       <a href="https://instagram.com/emma.goodwitch" target="_blank" rel="noopener">Instagram</a>
     </nav>
   </header>
+
   <section class="tiles" id="start">
-    <button class="tile" data-cat="dinner" style="background-image:url('https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=900&q=80')"><span>Quick & Easy</span></button>
-    <button class="tile" data-cat="all" style="background-image:url('https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?auto=format&fit=crop&w=900&q=80')"><span>Most Popular</span></button>
-    <button class="tile" data-cat="dessert" style="background-image:url('https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=900&q=80')"><span>Sweets</span></button>
-    <button class="tile" data-cat="board" style="background-image:url('https://images.unsplash.com/photo-1452195100486-9cc805987862?auto=format&fit=crop&w=900&q=80')"><span>Boards & Parties</span></button>
+    <button class="tile" data-cat="dinner" style="background-image:url('img/meals/15.jpg?v=2')"><span>Quick & Easy</span></button>
+    <button class="tile" data-cat="all" style="background-image:url('img/meals/30.jpg?v=2')"><span>Most Popular</span></button>
+    <button class="tile" data-cat="dessert" style="background-image:url('img/meals/08.jpg?v=2')"><span>Sweets</span></button>
+    <button class="tile" data-cat="board" style="background-image:url('img/meals/25.jpg?v=2')"><span>Boards & Parties</span></button>
   </section>
+
   <section class="mail">
     <p>Our recipes, your inbox.</p>
     <form onsubmit="event.preventDefault(); this.querySelector('button').textContent='Saved for later';">
@@ -44,31 +47,36 @@
       <button type="submit">Go</button>
     </form>
   </section>
+
   <main class="page" id="recipes">
     <h1>The Latest & Greatest</h1>
     <p class="lede" id="count">31 recipes from Emma's October kitchen</p>
     <div id="list"></div>
   </main>
+
   <section class="hi" id="about">
     <img src="../kitchen.jpg" alt="Emma in her kitchen" />
     <div>
       <p class="eyebrow">About</p>
       <h2>Hi! I’m Emma.</h2>
       <p>Nice to meet you. I’m a good witch who cooks one meal a night until Halloween.</p>
+      <p>Methods belong to the cooks I link to. A recipe idea is not owned — their photo and write-up are. I send you there.</p>
       <p>Play <a href="https://isardeepg.github.io/">Holly Haunt</a> · <a href="mailto:info@merahissa.co.in">info@merahissa.co.in</a> · <a href="https://instagram.com/emma.goodwitch">@emma.goodwitch</a></p>
     </div>
   </section>
+
   <footer>
     <p>emma's kitchen</p>
-    <p>Meal photos from Unsplash. Methods linked to the original cooks.</p>
+    <p>Meal photos made for each dish. Methods linked to the original cooks.</p>
   </footer>
+
   <dialog id="dlg">
     <div class="sheet">
       <button class="x" id="closeDlg" type="button">Close</button>
       <div id="dlgBody"></div>
     </div>
   </dialog>
-  <script src="meals.js"></script>
-  <script src="app.js"></script>
+  <script src="meals.js?v=3"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>
