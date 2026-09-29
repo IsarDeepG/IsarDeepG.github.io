@@ -244,6 +244,40 @@ body.reading { overflow: hidden; }
   line-height: 1.6;
 }
 
+.game {
+  width: min(1040px, calc(100% - 28px));
+  margin: 22px auto 0;
+  padding: 28px 24px;
+  background: #1a1210;
+  color: #f4e8d8;
+  border-radius: 6px;
+  position: relative;
+  z-index: 2;
+}
+.game h2 { font-family: var(--serif); font-size: clamp(28px, 5vw, 40px); font-weight: 500; margin: 6px 0 10px; color: #fff; }
+.game p { color: #d7c4ae; line-height: 1.6; max-width: 520px; }
+.game-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.btn {
+  display: inline-block; background: var(--gold); color: #1a1a1a;
+  text-decoration: none; font-weight: 800; padding: 12px 16px;
+}
+.btn.ghost { background: transparent; color: #f4e8d8; border: 1px solid #f4e8d8; }
+
+.shop { width: min(760px, calc(100% - 32px)); margin: 10px auto 50px; position: relative; z-index: 2; }
+.shop h2 { font-family: var(--serif); font-size: 36px; font-weight: 500; margin: 6px 0 8px; }
+.shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 18px; }
+.shop-grid a, .kit-row a {
+  display: block; text-align: center; text-decoration: none;
+  border: 1px solid var(--line); padding: 14px 10px;
+  color: var(--ink); font-weight: 700; background: rgba(255,255,255,.55);
+}
+.shop-grid a:hover, .kit-row a:hover { border-color: var(--purple); color: var(--purple); }
+.fine { font-size: 12px; color: var(--muted); margin-top: 12px; }
+.kit { margin-top: 32px; }
+.kit-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+.haunt { margin-top: 28px; padding: 16px 0 8px; border-top: 1px solid var(--line); color: var(--muted); }
+.haunt a { font-weight: 700; }
+
 @media (max-width: 720px) {
   .prop { font-size: 28px; }
   .p1 { top: 56px; left: 8px; }
@@ -257,4 +291,5 @@ body.reading { overflow: hidden; }
   .feel-wrap { position: static; text-align: right; margin-bottom: 4px; }
   #recipe .hero { height: 34vh; }
   .prep img { height: 110px; }
+  .shop-grid, .kit-row { grid-template-columns: 1fr 1fr; }
 }

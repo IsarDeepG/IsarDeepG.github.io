@@ -29,7 +29,18 @@ function applyTheme(id) {
   document.querySelectorAll("[data-theme-id]").forEach(b => b.classList.toggle("on", b.dataset.themeId === id));
 }
 
-function pic(m) { return m.img || IMGS[m.night]; }
+const SHOP = [
+  { name: "Saucepan", q: "saucepan" },
+  { name: "Skillet", q: "cast iron skillet" },
+  { name: "Baking sheet", q: "baking sheet tray" },
+  { name: "Mixing bowl", q: "mixing bowl" },
+  { name: "Piping bag", q: "piping bag" },
+  { name: "Candy eyes", q: "candy eyes" }
+];
+
+function shopUrl(q) {
+  return "https://www.amazon.in/s?k=" + encodeURIComponent(q);
+}
 
 let active = "all";
 
@@ -83,6 +94,13 @@ function showRecipe(night) {
       <h3>Method</h3>
       <ol class="steps">${steps}</ol>
       <p class="tweak">${m.tweak || ""}</p>
+      <div class="kit">
+        <p class="eyebrow">Emma uses</p>
+        <div class="kit-row">${SHOP.map(s => `<a href="${shopUrl(s.q)}" target="_blank" rel="noopener sponsored">${s.name}</a>`).join("")}</div>
+      </div>
+      <aside class="haunt">
+        <p>Food in the oven? <a href="https://isardeepg.github.io/" target="_blank" rel="noopener">Play Holly Haunt</a> while it bakes.</p>
+      </aside>
     </div>`;
   page.classList.add("open");
   document.body.classList.add("reading");
