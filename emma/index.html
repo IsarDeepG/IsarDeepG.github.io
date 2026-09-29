@@ -10,6 +10,12 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div class="frame" aria-hidden="true">
+    <div class="frame-bar top" id="propTop"></div>
+    <div class="frame-bar bot" id="propBot"></div>
+    <div class="frame-side left" id="propL"></div>
+    <div class="frame-side right" id="propR"></div>
+  </div>
   <header class="site-head">
     <div class="feel-wrap" id="festive">
       <button class="feel" id="festiveBtn" type="button">Feel · <span id="festiveLabel">Halloween</span></button>
@@ -24,10 +30,10 @@
     </nav>
   </header>
   <section class="tiles" id="start">
-    <button class="tile" data-cat="dinner" style="background-image:url('https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=900&q=80')"><span>Quick & Easy</span></button>
-    <button class="tile" data-cat="all" style="background-image:url('https://images.unsplash.com/photo-1547592166-23ac45744acd?w=900&q=80')"><span>Most Popular</span></button>
-    <button class="tile" data-cat="dessert" style="background-image:url('https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=900&q=80')"><span>Sweets</span></button>
-    <button class="tile" data-cat="board" style="background-image:url('https://images.unsplash.com/photo-1452195100486-9cc805987862?w=900&q=80')"><span>Boards & Parties</span></button>
+    <button class="tile" data-cat="dinner" style="background-image:url('https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=900&q=80')"><span>Quick & Easy</span></button>
+    <button class="tile" data-cat="all" style="background-image:url('https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?auto=format&fit=crop&w=900&q=80')"><span>Most Popular</span></button>
+    <button class="tile" data-cat="dessert" style="background-image:url('https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=900&q=80')"><span>Sweets</span></button>
+    <button class="tile" data-cat="board" style="background-image:url('https://images.unsplash.com/photo-1452195100486-9cc805987862?auto=format&fit=crop&w=900&q=80')"><span>Boards & Parties</span></button>
   </section>
   <section class="mail">
     <p>Our recipes, your inbox.</p>
@@ -46,15 +52,14 @@
     <div>
       <p class="eyebrow">About</p>
       <h2>Hi! I’m Emma.</h2>
-      <p>Nice to meet you. I’m a good witch in my early thirties — long chestnut hair, two thin side braids, a black hat, a burgundy cardigan — and I cook one meal a night until Halloween.</p>
-      <p>I snap my fingers. The dish appears. I taste it. It vanishes so the table is clear again. Hands empty. No talking. The food does the talking.</p>
-      <p>I am an AI-generated character. The recipes themselves belong to the home cooks I send you to. I just set the table.</p>
-      <p>Play <a href="https://isardeepg.github.io/">Holly Haunt</a> · write <a href="mailto:info@merahissa.co.in">info@merahissa.co.in</a> · follow <a href="https://instagram.com/emma.goodwitch">@emma.goodwitch</a></p>
+      <p>Nice to meet you. I’m a good witch who cooks one meal a night until Halloween.</p>
+      <p>Methods belong to the cooks I link to. A recipe idea is not owned — their photo and write-up are. I send you there.</p>
+      <p>Play <a href="https://isardeepg.github.io/">Holly Haunt</a> · <a href="mailto:info@merahissa.co.in">info@merahissa.co.in</a> · <a href="https://instagram.com/emma.goodwitch">@emma.goodwitch</a></p>
     </div>
   </section>
   <footer>
     <p>emma's kitchen</p>
-    <p>Layout after Pinch of Yum. Recipes linked to their original authors.</p>
+    <p>Meal photos from Unsplash. Methods linked to the original cooks.</p>
   </footer>
   <dialog id="dlg">
     <div class="sheet">
