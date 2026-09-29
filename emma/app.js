@@ -32,30 +32,24 @@ const IMGS = {
   31:"https://images.unsplash.com/photo-1614707267537-b85aaf00c2b1?auto=format&fit=crop&w=800&q=80"
 };
 const THEMES = {
-  kitchen:{label:"Everyday",props:"\ud83e\udd44 \ud83c\udf4b \ud83c\udf3f \ud83e\uddc4 \ud83c\udf5e \ud83e\uddc0 \ud83c\udf45"},
-  halloween:{label:"Halloween",props:"\ud83c\udf83 \ud83e\udd87 \ud83d\udd6f \ud83d\udd78\ufe0f \ud83c\udf6c \ud83d\udc7b \ud83d\udd2e"},
-  diwali:{label:"Diwali",props:"\ud83e\ude94 \u2728 \ud83d\udd6f \ud83c\udf15 \ud83c\udf38 \ud83c\udf86 \ud83d\udc9b"},
-  christmas:{label:"Christmas",props:"\ud83c\udf84 \ud83c\udf81 \u2744\ufe0f \u2b50 \ud83c\udf6a \ud83d\udd6f \ud83d\udd14"},
-  holi:{label:"Holi",props:"\ud83c\udfa8 \ud83c\udf38 \ud83d\udc9b \ud83d\udc9a \ud83d\udc99 \ud83e\udee7 \u2728"},
-  eid:{label:"Eid",props:"\ud83c\udf19 \u2728 \ud83d\udd4c \ud83d\udd6f \ud83c\udf38 \u2615 \ud83d\udc9b"},
-  thanksgiving:{label:"Thanksgiving",props:"\ud83c\udf42 \ud83e\udd83 \ud83e\udd67 \ud83c\udf3d \ud83c\udf41 \ud83e\udd56 \ud83d\udd6f"},
-  newyear:{label:"New Year",props:"\u2728 \ud83e\udd42 \ud83d\udd5b \ud83c\udf86 \ud83d\udcab \u2b50 \ud83c\udf89"},
-  easter:{label:"Easter",props:"\ud83d\udc23 \ud83c\udf38 \ud83e\udd5a \ud83d\udc30 \ud83c\udf37 \ud83c\udf5e \ud83c\udf3c"}
+  kitchen:{label:"Everyday",ribbon:"\ud83c\udf3f   \ud83c\udf4b   \ud83c\udf3f",props:["\ud83c\udf4b","\ud83c\udf3f","\ud83e\uddc4","\ud83c\udf5e"]},
+  halloween:{label:"Halloween",ribbon:"\ud83c\udf83   \ud83d\udd6f   \ud83c\udf83",props:["\ud83c\udf83","\ud83e\udd87","\ud83d\udd6f","\ud83d\udd78\ufe0f"]},
+  diwali:{label:"Diwali",ribbon:"\ud83e\ude94   \u2728   \ud83e\ude94",props:["\ud83e\ude94","\u2728","\ud83d\udd6f","\ud83c\udf15"]},
+  christmas:{label:"Christmas",ribbon:"\ud83c\udf84   \u2b50   \ud83c\udf84",props:["\ud83c\udf84","\ud83c\udf81","\u2744\ufe0f","\u2b50"]},
+  holi:{label:"Holi",ribbon:"\ud83c\udf38   \ud83c\udfa8   \ud83c\udf38",props:["\ud83c\udf38","\ud83c\udfa8","\ud83d\udc9b","\ud83e\udee7"]},
+  eid:{label:"Eid",ribbon:"\ud83c\udf19   \u2728   \ud83c\udf19",props:["\ud83c\udf19","\u2728","\ud83d\udd4c","\ud83d\udd6f"]},
+  thanksgiving:{label:"Thanksgiving",ribbon:"\ud83c\udf42   \ud83e\udd67   \ud83c\udf42",props:["\ud83c\udf42","\ud83e\udd83","\ud83e\udd67","\ud83c\udf41"]},
+  newyear:{label:"New Year",ribbon:"\u2728   \ud83e\udd42   \u2728",props:["\u2728","\ud83e\udd42","\ud83c\udf86","\u2b50"]},
+  easter:{label:"Easter",ribbon:"\ud83c\udf38   \ud83d\udc23   \ud83c\udf38",props:["\ud83d\udc23","\ud83c\udf38","\ud83e\udd5a","\ud83d\udc30"]}
 };
-function fillProps(str){
-  const row = Array(18).fill(str).join("  ");
-  const col = Array(14).fill(str).join("  ");
-  document.getElementById("propTop").textContent = row;
-  document.getElementById("propBot").textContent = row;
-  document.getElementById("propL").textContent = col;
-  document.getElementById("propR").textContent = col;
-}
+function placeProps(list){ ["p1","p2","p3","p4"].forEach((id,i)=>{ document.getElementById(id).textContent = list[i] || ""; }); }
 function applyTheme(id){
   const theme = THEMES[id] || THEMES.halloween;
   document.documentElement.dataset.theme = id;
   localStorage.setItem("emma-theme", id);
   document.getElementById("festiveLabel").textContent = theme.label;
-  fillProps(theme.props);
+  document.getElementById("ribbon").textContent = theme.ribbon;
+  placeProps(theme.props);
   document.querySelectorAll("[data-theme-id]").forEach(b => b.classList.toggle("on", b.dataset.themeId === id));
 }
 function pic(m){ return m.img || IMGS[m.night]; }
