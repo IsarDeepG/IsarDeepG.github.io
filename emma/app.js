@@ -1,4 +1,4 @@
-const IMGS = Object.fromEntries(Array.from({length:31}, (_,i) => [i+1, `img/meals/${String(i+1).padStart(2,"0")}.jpg?v=2`]));
+const IMGS = Object.fromEntries(Array.from({length:31}, (_,i) => [i+1, `img/meals/${String(i+1).padStart(2,"0")}.jpg?v=4`]));
 
 const THEMES = {
   kitchen: { label: "Everyday", ribbon: "🌿   🍋   🌿", props: ["🍋", "🌿", "🧄", "🍞"] },
@@ -14,7 +14,8 @@ const THEMES = {
 
 function placeProps(list) {
   ["p1", "p2", "p3", "p4"].forEach((id, i) => {
-    document.getElementById(id).textContent = list[i] || "";
+    const el = document.getElementById(id);
+    if (el) el.textContent = list[i] || "";
   });
 }
 
@@ -40,23 +41,66 @@ function render() {
       <img class="thumb" src="${pic(m)}" alt="${m.title}" loading="lazy" />
       <div>
         <h3>${m.title}</h3>
-        <p>${m.blurb} ${m.hook}</p>
-        <button class="more" data-night="${m.night}">Continue Reading</button>
+        <p>${m.blurb}</p>
+        <button class="more" data-night="${m.night}" type="button">Continue Reading</button>
       </div>
     </article>`).join("");
 }
 
 function openMeal(night) {
-  const m = EMMA_MEALS.find(x => x.night === night);
-  document.getElementById("dlgBody").innerHTML = `
-    <p class="eyebrow">Night ${m.night} · ${m.date}</p>
-    <h2 style="font-family:var(--serif);font-size:32px;margin:8px 0 12px">${m.emoji} ${m.title}</h2>
-    <img src="${pic(m)}" alt="${m.title}" />
-    <p style="font-style:italic;margin-bottom:10px">“${m.hook}”</p>
-    <p style="color:#555;line-height:1.6;margin-bottom:10px">${m.blurb}</p>
-    <p style="line-height:1.65;margin-bottom:12px">${m.how}</p>
-    <p>Full recipe: <a href="${m.recipe}" target="_blank" rel="noopener">${m.source}</a></p>`;
-  document.getElementById("dlg").showModal();
+  if (location.hash !== "#night-" + night) location.hash = "night-" + night;
+  else showRecipe(night);
+}
+
+function closeMeal() {
+  if (location.hash.indexOf("night-") === 1) history.pushState("", document.title, location.pathname + location.search);
+  hideRecipe();
+}
+
+function showRecipe(night) {
+  const m = EMMA_MEALS.find(x => x.night === Number(night));
+  if (!m) return hideRecipe();
+  const prep = (m.prep || []).map(src => `<img src="${src}" alt="Prep for ${m.title}" />`).join("");
+  const ingredients = (m.ingredients || []).map(i => `<li>${i}</li>`).join("");
+  const steps = (m.steps || []).map((s, i) => `<li><span class="n">${i + 1}</span><p>${s}</p></li>`).join("");
+  const page = document.getElementById("recipe");
+  page.innerHTML = `
+    <div class="recipe-bar">
+      <button class="back" type="button" id="backBtn">← Kitchen</button>
+      <span>Night ${m.night}</span>
+    </div>
+    <img class="hero" src="${pic(m)}" alt="${m.title}" />
+    <div class="recipe-body">
+      <p class="eyebrow">Night ${m.night} · ${m.date}</p>
+      <h2>${m.title}</h2>
+      <p class="meta">${m.time} · Serves ${m.serves}</p>
+      <p class="quote">“${m.hook}”</p>
+      <p class="lede-r">${m.blurb}</p>
+      <h3>In the kitchen</h3>
+      <div class="prep">${prep}</div>
+      <h3>Ingredients</h3>
+      <ul class="ings">${ingredients}</ul>
+      <h3>Method</h3>
+      <ol class="steps">${steps}</ol>
+      <p class="tweak">${m.tweak || ""}</p>
+    </div>`;
+  page.classList.add("open");
+  document.body.classList.add("reading");
+  page.scrollTop = 0;
+  document.getElementById("backBtn").onclick = closeMeal;
+}
+
+function hideRecipe() {
+  const page = document.getElementById("recipe");
+  page.classList.remove("open");
+  page.innerHTML = "";
+  document.body.classList.remove("reading");
+}
+
+function onHash() {
+  const match = location.hash.match(/^#night-(\d+)/);
+  if (match) showRecipe(match[1]);
+  else hideRecipe();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -88,9 +132,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const b = e.target.closest("[data-night]");
     if (b) openMeal(Number(b.dataset.night));
   };
-  document.getElementById("closeDlg").onclick = () => document.getElementById("dlg").close();
-  document.getElementById("dlg").addEventListener("click", e => { if (e.target.id === "dlg") e.target.close(); });
 
+  window.addEventListener("hashchange", onHash);
   applyTheme(localStorage.getItem("emma-theme") || "halloween");
   render();
+  onHash();
 });
