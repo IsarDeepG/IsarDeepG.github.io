@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="halloween">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Emma's Kitchen · 31 festive recipes</title>
+  <meta name="description" content="Emma is a good witch who cooks one recipe a night. Watch on Instagram, YouTube or Facebook, then make the meal." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="logo" href="#">Emma's Kitchen<small>@emma.goodwitch</small></a>
+      <nav class="nav-links">
+        <a href="#recipes">Recipes</a>
+        <a href="#about">About Emma</a>
+        <a href="https://instagram.com/emma.goodwitch" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://isardeepg.github.io/">Haunted house</a>
+      </nav>
+      <div class="top-right">
+        <input id="q" class="search-mini" type="search" placeholder="Search recipes" />
+        <div class="festive" id="festive">
+          <button class="festive-btn" id="festiveBtn" type="button">Feel: <span id="festiveLabel">Halloween</span> ▾</button>
+          <div class="festive-menu" id="festiveMenu"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="hero">
+      <div class="hero-bg" id="heroBg"></div>
+      <div class="hero-copy">
+        <div class="kicker" id="kicker">31 nights till Halloween</div>
+        <h1 id="heroTitle">Spooky meals from a good witch.</h1>
+        <p id="heroLede">One recipe every night in October. Watch the reel, then cook the spell.</p>
+        <div class="cta-row">
+          <a class="btn" href="#recipes">Browse all 31</a>
+          <a class="btn ghost" href="#about">Meet Emma</a>
+        </div>
+      </div>
+    </section>
+    <div class="cats" id="cats"></div>
+    <div class="section-head" id="recipes">
+      <div>
+        <h2>The latest from the kitchen</h2>
+        <p>31 nights of meals. Watch links light up when you add them.</p>
+      </div>
+      <p id="count">31 recipes</p>
+    </div>
+    <div class="grid" id="grid"></div>
+    <section class="about" id="about">
+      <img src="../kitchen.jpg" alt="Emma's witch kitchen" />
+      <div class="about-copy">
+        <div class="kicker">About</div>
+        <h2>Hi, I’m Emma.</h2>
+        <p>I’m a good witch in my early thirties. Long chestnut hair, two thin side braids, a black pointed hat, a burgundy cardigan, and a cottage kitchen that smells like cocoa and candle wax.</p>
+        <p>Every October I cook one meal a night until Halloween. I am an AI-generated character. Recipes belong to the original sites I link to.</p>
+        <p>Play <a href="https://isardeepg.github.io/">Holly Haunt</a>. Write to <a href="mailto:info@merahissa.co.in">info@merahissa.co.in</a>. Follow <a href="https://instagram.com/emma.goodwitch">@emma.goodwitch</a>.</p>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <div class="wrap">
+      <p>Emma's Kitchen · AI-generated character · recipes linked to their original authors.</p>
+    </div>
+  </footer>
+  <dialog id="dlg">
+    <div class="modal">
+      <button class="close" id="closeDlg" type="button">Close</button>
+      <div id="dlgBody"></div>
+    </div>
+  </dialog>
+  <script src="meals.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
